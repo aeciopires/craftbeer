@@ -58,6 +58,7 @@ Use o comando a seguir para iniciar um conteiner da aplicação.
 
 ```sh
 docker container run -d -p 9000:9000 --name craft-beer \
+--restart always \
 -e DATASOURCE_URL="postgresql://172.17.0.1:5433/craft_beer" \
 -e DATASOURCE_USERNAME="postgres" \
 -e DATASOURCE_PASSWORD="postgres" \
@@ -129,6 +130,7 @@ Inicie o Prometheus usando o Docker com o seguinte comando.
 
 ```sh
 docker container run -d -p 9090:9090 \
+--restart always \
 --name prometheus \
 -v /docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml \
 prom/prometheus:v2.38.0
