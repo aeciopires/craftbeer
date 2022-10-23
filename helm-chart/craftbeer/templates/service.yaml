@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "craftbeer.fullname" . }}
+  labels:
+    {{- include "craftbeer.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: containerport
+      protocol: TCP
+      name: serviceport
+  selector:
+    {{- include "craftbeer.selectorLabels" . | nindent 4 }}

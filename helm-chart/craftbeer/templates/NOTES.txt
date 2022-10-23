@@ -1,0 +1,17 @@
+Thanks for install craftbeer on Kubernetes!!!
+
+Create port-forward:
+
+```bash
+kubectl port-forward svc/{{ include "craftbeer.fullname" . }} 9000:{{ .Values.service.port }} -n {{ .Release.Namespace }}
+```
+
+Access the application:
+
+```bash
+echo "Visit http://127.0.0.1:9000/beerhouse/swagger-ui.html to use swagger editor"
+
+Or:
+
+echo "Visit http://127.0.0.1:9000/beerhouse/monitoring/prometheus to get metrics in prometheus format"
+```

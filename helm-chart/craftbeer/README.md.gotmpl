@@ -1,0 +1,182 @@
+{{ template "chart.header" . }}
+{{ template "chart.typeBadge" . }} {{ template "chart.versionBadge" . }}
+
+{{ template "chart.description" . }}
+
+# TL;DR - just show me how to install
+
+If you have already carefully read all the below and just want to get reminded on how to install, please jump directly to the [Installation](#installation) section.
+
+# Requirements
+
+## Kubernetes Cluster
+
+You will need to create a Kubernetes cluster locally using [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube), [microk8s](https://microk8s.io), [kind](https://kind.sigs.k8s.io), [k3s](https://k3s.io) or other tools.
+
+Or use Kubernetes cluster in [EKS](https://aws.amazon.com/eks), [GKE](https://cloud.google.com/kubernetes-engine), [AKS](https://docs.microsoft.com/en-us/azure/aks), [DOKS](https://www.digitalocean.com/products/kubernetes) or other cloud provider.
+
+## Kubectl
+
+Install ``kubectl`` command.
+
+```bash
+VERSION=v1.22.2
+KUBECTL_BIN='kubectl'
+
+curl -LO https://storage.googleapis.com/kubernetes-release/release/${VERSION}/bin/linux/amd64/${KUBECTL_BIN}
+
+chmod +x ${KUBECTL_BIN}
+
+sudo mv ${KUBECTL_BIN} /usr/local/bin/${KUBECTL_BIN}
+
+sudo ln -sf /usr/local/bin/${KUBECTL_BIN} /usr/bin/${KUBECTL_BIN}
+
+kubectl version --client
+```
+
+## Helm
+
+Install ``helm`` command.
+
+```bash
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+
+chmod 700 get_helm.sh
+
+DESIRED_VERSION=v3.7.1 ./get_helm.sh
+
+helm version
+```
+
+# Installation
+
+* First, access a Kubernetes cluster.
+
+* Create namespace ``{{ template "chart.name" . }}`` in Kubernetes cluster.
+
+```bash
+kubectl create namespace {{ template "chart.name" . }}
+```
+
+Create postgresql database:
+
+```bash
+helm repo add bitnami https://charts.bitnami.com/bitnami
+
+helm repo update
+
+helm upgrade --install mypostgresql bitnami/postgresql --version 11.9.10 -n {{ template "chart.name" . }} \
+ --set auth.username='craftbeer' \
+ --set auth.password='craftbeer' \
+ --set auth.database='craftbeer'
+```
+
+Create status of pods of the postgresql database:
+
+```bash
+kubectl get pods -n {{ template "chart.name" . }}
+```
+
+* Change the values according to the need of the environment in ``{{ template "chart.name" . }}/values.yaml`` file.
+
+* Test the installation with command:
+
+```bash
+helm upgrade --install {{ template "chart.name" . }} -f {{ template "chart.name" . }}/values.yaml {{ template "chart.name" . }}/ -n {{ template "chart.name" . }} --dry-run
+```
+
+* To install/upgrade the chart with the release name `{{ template "chart.name" . }}`:
+
+```bash
+helm upgrade --install {{ template "chart.name" . }} -f {{ template "chart.name" . }}/values.yaml {{ template "chart.name" . }}/ -n {{ template "chart.name" . }}
+```
+
+These commands install {{ template "chart.name" . }} on the Kubernetes cluster in the default configuration. The [Parameters](#parameters) section lists the parameters that can be configured during installation.
+
+# Accessing the application
+
+Create port-forward:
+
+```bash
+kubectl port-forward svc/{{ template "chart.name" . }} 9000:9000 -n {{ template "chart.name" . }}
+```
+
+Access the application:
+
+```bash
+echo "Visit http://127.0.0.1:9000/beerhouse/swagger-ui.html to use swagger editor"
+
+Or:
+
+echo "Visit http://127.0.0.1:9000/beerhouse/monitoring/prometheus to get metrics in prometheus format"
+```
+
+# Troubleshooting
+
+* List pods:
+
+```bash
+kubectl get pods -n {{ template "chart.name" . }} -l 'app.kubernetes.io/name={{ template "chart.name" . }}'
+```
+
+* Get logs of deploy:
+
+```bash
+kubectl logs -f deploy/'{{ template "chart.name" . }}' -n {{ template "chart.name" . }}
+```
+
+* List all releases using follow command:
+
+```bash
+helm list --all --all-namespaces
+
+#or
+
+helm list -f '{{ template "chart.name" . }}' -n {{ template "chart.name" . }}
+```
+
+* See status of the installation of application:
+
+```bash
+helm status {{ template "chart.name" . }} -n {{ template "chart.name" . }}
+```
+
+* See the history of versions of ``{{ template "chart.name" . }}`` application with command.
+
+```bash
+helm history {{ template "chart.name" . }} -n {{ template "chart.name" . }}
+```
+
+## Uninstallation
+
+To uninstall/delete the `{{ template "chart.name" . }}` deployment:
+
+```bash
+helm uninstall {{ template "chart.name" . }} -n {{ template "chart.name" . }}
+```
+
+The command removes all the Kubernetes components associated with the chart and deletes the release.
+
+> If the application is removed without the ``--keep-history`` option, the history will be lost and it will not be possible to roll back.
+
+## Parameters
+
+The following tables lists the configurable parameters of the chart and their default values.
+
+{{ template "chart.valuesTable" . }}
+
+Change the values according to the need of the environment in ``{{ template "chart.name" . }}/values.yaml`` file.
+
+# Documentation of Helm Chart
+
+* Install helm-docs following the instructions on this page https://github.com/norwoodj/helm-docs
+
+* Generate docs with helm-docs for this chart.
+
+```bash
+cd {{ template "chart.name" . }}
+
+helm-docs
+```
+
+The markdown generation is entirely gotemplate driven. The tool parses metadata from charts and generates a number of sub-templates that can be referenced in a template file (by default ``README.md.gotmpl``). If no template file is provided, the tool has a default internal template that will generate a reasonably formatted README.

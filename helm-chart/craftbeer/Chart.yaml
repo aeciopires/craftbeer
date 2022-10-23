@@ -1,0 +1,18 @@
+apiVersion: v2
+name: craftbeer
+description: Helm chart for install craftbeer on Kubernetes
+type: application
+version: 1.0.0
+appVersion: "3.1.0"
+keywords:
+  - craftbeer
+  - kubernetes
+  - helm
+home: https://github.com/janainamilitao/craftbeer
+sources:
+  - https://github.com/janainamilitao/craftbeer
+maintainers:
+  - name: Janaina Militão
+    url: https://www.janainamilitao.com/
+  - name: Aécio Pires
+    url: http://aeciopires.com
